@@ -50,7 +50,7 @@ RUN sed -i".bak" -e 's/wstool update/wstool update -j100/g' /tmp/jsk.rosbuild
 RUN yes p | bash /tmp/jsk.rosbuild hydro setup-ros
 RUN yes p | bash /tmp/jsk.rosbuild hydro install-jsk-ros-pkg
 # temporally removed from compiling
-RUN cd $HOME/ros/hydro/src && wstool rm humanoid_stacks/humanoid_navigation
+RUN rm -rf $HOME/ros/hydro/src/humanoid_stacks
 RUN yes p | bash /tmp/jsk.rosbuild hydro compile-jsk-ros-pkg
 RUN yes p | bash /tmp/jsk.rosbuild hydro test-jsk-ros-pkg
 
