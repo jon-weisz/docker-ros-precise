@@ -46,14 +46,14 @@ RUN x11vnc -storepasswd 1234 $HOME/.vnc/passwd
 
 # install ros
 RUN wget -q -O /tmp/jsk.rosbuild https://raw.github.com/jsk-ros-pkg/jsk_common/master/jsk.rosbuild
-RUN sed -i".bak" -e 's/wstool update/wstool update -j100/g' /tmp/jsk.rosbuild
-RUN yes p | bash /tmp/jsk.rosbuild hydro --rtm
+RUN sed -i".bak" -e 's/rosws update/rosws update -j100/g' /tmp/jsk.rosbuild
+RUN yes p | bash /tmp/jsk.rosbuild groovy --rtm
 
 # remove nopasswd for rosuser
 USER root
 RUN sed -e 's/NOPASSWD:ALL/ALL/g' /etc/sudoers
 USER rosuser
 
-RUN echo "source $HOME/ros/hydro/devel/setup.bash" >> $HOME/.bashrc
+RUN echo "source $HOME/ros/groovy/setup.bash" >> $HOME/.bashrc
 
 ENTRYPOINT "/bin/bash"
