@@ -49,6 +49,8 @@ RUN wget -q -O /tmp/jsk.rosbuild https://raw.github.com/jsk-ros-pkg/jsk_common/m
 RUN sed -i".bak" -e 's/wstool update/wstool update -j100/g' /tmp/jsk.rosbuild
 RUN yes p | bash /tmp/jsk.rosbuild hydro --rtm setup-ros
 RUN yes p | bash /tmp/jsk.rosbuild hydro --rtm install-jsk-ros-pkg
+RUN cd $HOME/ros/hydro/src && wstool rm rtm-ros-robotics/rtmros_gazebo
+RUN cd $HOME/ros/hydro/src && wstool rm humanoid_stacks/humanoid_navigation
 RUN yes p | bash /tmp/jsk.rosbuild hydro --rtm compile-jsk-ros-pkg
 RUN yes p | bash /tmp/jsk.rosbuild hydro --rtm test-jsk-ros-pkg
 
