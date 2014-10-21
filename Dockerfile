@@ -1,24 +1,26 @@
 FROM ubuntu:12.04
-MAINTAINER Furushchev <furushchev@mail.ru>
+MAINTAINER Jon Weisz <jon.weisz@gmail.com>
+#Builds a base vanilla groovy-precise image
+#
 
-RUN sed -i".bak" -e 's/\/\/archive.ubuntu.com/\/\/ftp.jaist.ac.jp/g'  /etc/apt/sources.list
+
 RUN apt-get -q update
 ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get install -y apt-utils
 RUN apt-get upgrade -y
 
-# locale
-RUN apt-get install -y --no-install-recommends locales language-pack-ja
-RUN locale-gen ja_JP.UTF-8
-RUN locale-gen en_US.UTF-8
-#RUN update-locale LANG=en_JP.UTF-8
-RUN dpkg-reconfigure locales
-ENV LANG ja_JP.UTF-8
-ENV DEBIAN_FRONTEND noninteractive LANG
-
+ENV DISTRO precise
+ENV ROSDISTRO groovy
 
 # minimum installation
-RUN apt-get install -y software-properties-common ssh sudo wget curl emacs23-nox nginx lsb-release
+RUN apt-get install -y software-properties-common ssh sudo wget curl emacs23-nox lsb-release
+
+#minimal ROS Install
+RUN sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $DISTRO main" > /etc/apt/sources.list.d/ros-latest.list'
+RUN wget http://packages.ros.org/ros.key -O - | apt-key add -
+RUN apt-get update
+RUN apt-get install -y ros-groovy-desktop-full
+
 
 # add rosuser user
 ENV USERNAME rosuser
@@ -29,35 +31,10 @@ RUN echo "$USERNAME:$USERNAME" | chpasswd
 RUN echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 RUN chown -R $USERNAME:$USERNAME $HOME
 
-RUN mkdir -p $HOME/.ssh; chown $USERNAME $HOME/.ssh; chmod 0700 $HOME/.ssh
-ADD authorized_keys $HOME/.ssh/
-ADD authorized_keys /root/.ssh/
-RUN service ssh restart
-EXPOSE 22
-
 # change user
 USER rosuser
 WORKDIR /home/rosuser/
 
-# setup vnc
-RUN sudo apt-get install -y x11vnc xvfb firefox
-RUN mkdir $HOME/.vnc
-RUN x11vnc -storepasswd 1234 $HOME/.vnc/passwd
-
-# install ros
-RUN wget -q -O /tmp/jsk.rosbuild https://raw.github.com/jsk-ros-pkg/jsk_common/master/jsk.rosbuild
-RUN sed -i".bak" -e 's/wstool update/wstool update -j100/g' /tmp/jsk.rosbuild
-RUN yes p | bash /tmp/jsk.rosbuild hydro setup-ros
-RUN yes p | bash /tmp/jsk.rosbuild hydro install-jsk-ros-pkg
-# temporally removed from compiling
-RUN rm -rf $HOME/ros/hydro/src/humanoid_stacks
-RUN yes p | bash /tmp/jsk.rosbuild hydro compile-jsk-ros-pkg
-RUN yes p | bash /tmp/jsk.rosbuild hydro test-jsk-ros-pkg
-
-# remove nopasswd for rosuser
-USER root
-RUN sed -e 's/NOPASSWD:ALL/ALL/g' /etc/sudoers
-USER rosuser
 
 RUN echo "source $HOME/ros/hydro/devel/setup.bash" >> $HOME/.bashrc
 
