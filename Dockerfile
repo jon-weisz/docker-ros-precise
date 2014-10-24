@@ -22,7 +22,11 @@ RUN sudo apt-get install -y ros-groovy-desktop-full
 USER tester
 WORKDIR /home/tester/
 
+#Add the base .bashrc.ros
 
-RUN echo "source /opt/ros/groovy/devel/setup.bash" >> $HOME/.bashrc
+RUN echo "source /opt/ros/setup.bash" >> $HOME/.bashrc
+
+#This fixes a bug in running qt programs in the container
+RUN echo "export QT_GRAPHICSSYSTEM=native" >> $HOME/.bashrc
 
 ENTRYPOINT "/bin/bash"
